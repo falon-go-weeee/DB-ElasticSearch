@@ -62,6 +62,7 @@ def create_dummy_data(df):
     delivery_option_col = []
     date_time_col = []
     Building_no_col = []
+    id = []
     for index, row in df.iterrows():
         open_timing_col.append(random.choice(open_timing))
         closing_timing_col.append(random.choice(closing_timing))
@@ -72,6 +73,7 @@ def create_dummy_data(df):
         state_col.append(state)
         date_time_col.append(date_time)
         Building_no_col.extend(re.findall('^\d+', row['STREET_ADDRESS']))
+        id.append(index)
     temp = pd.DataFrame({'open_timing': open_timing_col,
                          'closing_timing': closing_timing_col,
                          'contact_no': contact_no_col,
@@ -80,7 +82,8 @@ def create_dummy_data(df):
                          'rating': rating_col,
                          'STATE': state_col,
                          'BUILDING_NO': Building_no_col,
-                         'date_time': date_time_col}
+                         'date_time': date_time_col,
+                         'id': id}
                          )
     temp = pd.concat([df, temp], axis=1)
     return temp
@@ -89,46 +92,51 @@ def create_addresses_tables(df):
     # print(df.info())
     sa = store_addresses()
     Session = sa.sql.session()
+    query_ls = []
+    df = df[['id', 'STREET_ADDRESS', 'CITY', 'STATE', 'ZIP_CODE', 'date_time']]
+    df_ls = df.to_dict('records')
     with Session() as session:
-        for i,row in df.iterrows():
-            insert_store_addresses_query = sa.store_addresses_table.insert().values(id=i,                 
-                                                                STREET_ADDRESS=row['STREET_ADDRESS'],
-                                                                CITY=row['CITY'],
-                                                                STATE=row['STATE'],
-                                                                ZIP_CODE=row['ZIP_CODE'],
-                                                                date_time=row['date_time']
-                                                                )
-            
+        # for i,row in df.iterrows():
+        #     insert_store_addresses_query = sa.store_addresses_table.insert().values(id=i,                 
+        #                                                         STREET_ADDRESS=row['STREET_ADDRESS'],
+        #                                                         CITY=row['CITY'],
+        #                                                         STATE=row['STATE'],
+        #                                                         ZIP_CODE=row['ZIP_CODE'],
+        #                                                         date_time=row['date_time']
+        #                                                          )
             # insert_raw_addresses_query = gs.raw_address_table.insert().values(id=i, 
             #                                                     ADDRESS=row['STREET_ADDRESS']+','+row['CITY']+row['STATE']+','+row['ZIP_CODE']
             #                                                     )
             
             # print(insert_query)
-            
-            session.execute(insert_store_addresses_query)
+        insert_store_addresses_query = sa.store_addresses_table.insert().values(df_ls)
+        session.execute(insert_store_addresses_query)
         session.commit()
 
 def create_stores_tables(df):
     gs = grocery_stores()
     Session = gs.sql.session()
+    df = df[['BUSINESS_NAME', 'DBA_NAME', 'open_timing', 'closing_timing', 'contact_no', 'payment_option', 'delivery_option', 'rating', 'date_time', 'id']]
+    df_ls = df.to_dict('records')
     with Session() as session:
-        for i,row in df.iterrows():
-            # print(row)
-            # col_values = [row[col_name] for col_name in df.keys().to_list()]
-            # print(len(df.keys().to_list()))
-            insert_stores_query = gs.grocery_stores_table.insert().values(store_id=i,
-                                                                BUSINESS_NAME=row['BUSINESS_NAME'],
-                                                                DBA_NAME=row['DBA_NAME'],
-                                                                open_timing=row['open_timing'],
-                                                                closing_timing=row['closing_timing'],
-                                                                contact_no=int(row['contact_no']),
-                                                                payment_option=row['payment_option'],
-                                                                delivery_option=row['delivery_option'],
-                                                                rating=row['rating'],
-                                                                date_time=row['date_time'],
-                                                                id=i
-                                                                )
-            session.execute(insert_stores_query)
+        # for i,row in df.iterrows():
+        #     # print(row)
+        #     # col_values = [row[col_name] for col_name in df.keys().to_list()]
+        #     # print(len(df.keys().to_list()))
+        #     insert_stores_query = gs.grocery_stores_table.insert().values(store_id=i,
+        #                                                         BUSINESS_NAME=row['BUSINESS_NAME'],
+        #                                                         DBA_NAME=row['DBA_NAME'],
+        #                                                         open_timing=row['open_timing'],
+        #                                                         closing_timing=row['closing_timing'],
+        #                                                         contact_no=int(row['contact_no']),
+        #                                                         payment_option=row['payment_option'],
+        #                                                         delivery_option=row['delivery_option'],
+        #                                                         rating=row['rating'],
+        #                                                         date_time=row['date_time'],
+        #                                                         id=i
+        #           )
+        insert_stores_query = gs.grocery_stores_table.insert().values(df_ls)
+        session.execute(insert_stores_query)
 
         
             # session.execute(insert_raw_addresses_query)
@@ -139,7 +147,8 @@ if __name__=='__main__':
     df = clean_df()
     # print(df.columns)
     temp = create_dummy_data(df)
-    # print(temp)
-    # create_addresses_tables(temp.dropna())
+    # temp = temp[['STREET_ADDRESS', 'CITY', 'STATE', 'ZIP_CODE', 'date_time']]
+    print(temp.columns)
+    create_addresses_tables(temp.dropna())
     create_stores_tables(temp.dropna())
     

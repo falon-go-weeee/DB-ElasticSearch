@@ -14,8 +14,8 @@ class grocery_stores(store_addresses):
     
     def __init__(self):
         self.sql = connect_db('grocery')
-        sa = store_addresses()
-        store_addresses_table = Table("store_addresses", sa.metadata, autoload_with=self.sql.engine, echo=True)
+        self.store_addresses = store_addresses()
+        store_addresses_table = Table("store_addresses", self.store_addresses.metadata, autoload_with=self.sql.engine, echo=True)
         self.grocery_stores_table = Table('grocery_stores', self.metadata,
                             Column('store_id', Integer, primary_key=True, autoincrement='auto'),
                             Column('BUSINESS_NAME', String(100)),
