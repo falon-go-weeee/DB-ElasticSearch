@@ -1,0 +1,15 @@
+#!/bin/bash
+
+export PG_USER=akshay
+export PG_PASSWORD=newpassword
+
+# export ELASTICSEARCH_HOST=bore.pub
+# export ELASTICSEARCH_PORT=34525
+
+export ELASTICSEARCH_HOST=localhost
+export ELASTICSEARCH_PORT=9200
+
+path=$(pwd)
+
+bootstrap --config $path/schema.json
+pgsync --config $path/schema.json
