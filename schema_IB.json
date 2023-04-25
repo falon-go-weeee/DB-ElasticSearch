@@ -1,0 +1,87 @@
+[
+    {
+        "database": "grocery",
+        "index": "ib_index",
+        "setting": {
+            "analysis": {
+                "analyzer": {
+                    "address_analyzer": {
+                        "type": "pattern",
+                        "lowercase": false,
+                        "tokenizer": "pattern_tokenizer",
+                        "filter": [
+                            "address_stop_words_filter"
+                        ]
+                    }
+                },
+                "filter": {
+                    "address_stop_words_filter": {
+                        "type": "stop",
+                        "ignore_case": true,
+                        "stopwords": [
+                            "INC",
+                            "ST",
+                            "LLC",
+                            "AVENUE",
+                            "STREET",
+                            "BLVD"
+                        ]
+                    }
+                },
+                "tokenizer": {
+                    "pattern_tokenizer": {
+                        "type": "pattern"
+                    }
+                }
+            },
+            "similarity": {
+                "address_similarity": {
+                    "type": "IB",
+                    "distribution": "ll",
+                    "lambda": "df",
+                    "normalization": "h2"
+            }
+            }
+        },
+        "mappings": {
+            "properties": {
+              "field": {
+                "type": "text",
+                "analyzer": "address_analyzer",
+                "search_analyzer": "address_analyzer",
+                "similarity": "address_similarity"
+              }
+            }
+        },
+        "nodes": {
+            "table": "store_addresses",
+            "columns": [
+                "id",
+                "STREET_ADDRESS",
+                "CITY",
+                "STATE",
+                "ZIP_CODE"
+            ],
+            "children": [
+                {
+                    "table": "grocery_stores",
+                    "columns": [
+                        "id",
+                        "BUSINESS_NAME",
+                        "DBA_NAME",
+                        "open_timing",
+                        "closing_timing",
+                        "contact_no",
+                        "payment_option",
+                        "delivery_option",
+                        "rating"
+                    ],
+                    "relationship": {
+                        "variant": "object",
+                        "type": "one_to_one"
+                    }
+                }
+            ]
+        }
+    }
+]

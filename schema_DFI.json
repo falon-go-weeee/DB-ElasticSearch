@@ -1,0 +1,68 @@
+[
+    {
+        "database": "grocery",
+        "index": "dfi_index",
+        "setting": {
+            "analysis": {
+                "analyzer": {
+                    "address_analyzer": {
+                        "type": "pattern",
+                        "lowercase": false,
+                        "tokenizer": "pattern_tokenizer"
+                    }
+                },
+                "tokenizer": {
+                    "pattern_tokenizer": {
+                        "type": "pattern"
+                    }
+                }
+            },
+            "similarity": {
+                "address_similarity": {
+                    "type": "DFI",
+                    "independence_measure": "standardized"
+                }
+            }
+        },
+        "mappings": {
+            "properties": {
+              "field": {
+                "type": "text",
+                "analyzer": "address_analyzer",
+                "search_analyzer": "address_analyzer",
+                "similarity": "address_similarity"
+              }
+            }
+        },
+        "nodes": {
+            "table": "store_addresses",
+            "columns": [
+                "id",
+                "STREET_ADDRESS",
+                "CITY",
+                "STATE",
+                "ZIP_CODE"
+            ],
+            "children": [
+                {
+                    "table": "grocery_stores",
+                    "columns": [
+                        "id",
+                        "BUSINESS_NAME",
+                        "DBA_NAME",
+                        "open_timing",
+                        "closing_timing",
+                        "contact_no",
+                        "payment_option",
+                        "delivery_option",
+                        "rating"
+                    ],
+                    "relationship": {
+                        "variant": "object",
+                        "type": "one_to_one"
+                    }
+                }
+            ]
+        }
+    }
+]

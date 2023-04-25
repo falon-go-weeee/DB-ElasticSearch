@@ -1,0 +1,114 @@
+[
+    {
+        "database": "grocery",
+        "index": "lmj_index",
+        "setting": {
+            "analysis": {
+                "analyzer": {
+                    "address_analyzer": {
+                        "type": "pattern",
+                        "lowercase": true,
+                        "tokenizer": "pattern_tokenizer",
+                        "filter": [
+                            "address_stop_words_filter"
+                        ]
+                    }
+                },
+                "filter": {
+                    "address_stop_words_filter": {
+                        "type": "stop",
+                        "ignore_case": true,
+                        "stopwords": [
+                            "INC",
+                            "ST",
+                            "LLC",
+                            "AVENUE",
+                            "STREET",
+                            "BLVD"
+                        ]
+                    }
+                },
+                "tokenizer": {
+                    "pattern_tokenizer": {
+                        "type": "pattern"
+                    }
+                }
+            },
+            "similarity": {
+                "address_similarity": {
+                    "type": "LMJelinekMercer",
+                    "lambda": "0.3"
+                }
+            }
+        },
+        "nodes": {
+            "table": "store_addresses",
+            "schema": "public",
+            "columns": [
+                "id",
+                "STREET_ADDRESS",
+                "CITY",
+                "STATE",
+                "ZIP_CODE"
+            ],
+            "transform": {
+                "mapping": {
+                    "STREET_ADDRESS": {
+                        "type": "text",
+                        "analyzer": "address_analyzer",
+                        "search_analyzer": "address_analyzer",
+                        "similarity": "address_similarity"
+                    },
+                    "CITY": {
+                        "type": "text",
+                        "analyzer": "address_analyzer",
+                        "search_analyzer": "address_analyzer",
+                        "similarity": "address_similarity"
+                    },
+                    "STATE": {
+                        "type": "text",
+                        "analyzer": "address_analyzer",
+                        "search_analyzer": "address_analyzer",
+                        "similarity": "address_similarity"
+                    }
+                }
+            },
+            "children": [
+                {
+                    "table": "grocery_stores",
+                    "columns": [
+                        "id",
+                        "BUSINESS_NAME",
+                        "DBA_NAME",
+                        "open_timing",
+                        "closing_timing",
+                        "contact_no",
+                        "payment_option",
+                        "delivery_option",
+                        "rating"
+                    ],
+                    "transform": {
+                        "mapping": {
+                            "BUSINESS_NAME": {
+                                "type": "text",
+                                "analyzer": "address_analyzer",
+                                "search_analyzer": "address_analyzer",
+                                "similarity": "address_similarity"
+                            },
+                            "payment_option": {
+                                "type": "text",
+                                "analyzer": "address_analyzer",
+                                "search_analyzer": "address_analyzer",
+                                "similarity": "address_similarity"
+                            }
+                        }
+                    },
+                    "relationship": {
+                        "variant": "object",
+                        "type": "one_to_one"
+                    }
+                }
+            ]
+        }
+    }
+]
